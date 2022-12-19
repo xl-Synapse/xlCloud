@@ -1,0 +1,43 @@
+spring:
+  redis:
+    host: 192.168.192.3
+    port: 6379
+    #    password: xllove33
+    lettuce:
+      pool:
+        max-active: 10
+        max-idle: 10
+        min-idle: 1
+        time-between-eviction-runs: 10s
+
+  jackson:
+    #日期格式化
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      #格式化输出
+      indent_output: true
+      #忽略无法转换的对象
+      fail_on_empty_beans: false
+    #设置空如何序列化
+    defaultPropertyInclusion: NON_EMPTY
+    deserialization:
+      #允许对象忽略json中不存在的属性
+      fail_on_unknown_properties: false
+    parser:
+      #允许出现特殊字符和转义符
+      allow_unquoted_control_chars: true
+      #允许出现单引号
+      allow_single_quotes: true
+  application:
+    name: xlCloud
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.192.3:3306/xlCloud
+    username: root
+    password: xllove33
+
+server:
+  tomcat:
+    relaxed-path-chars: ^,[,],
+    relaxed-query-chars: ^,[,]
+    uri-encoding: UTF-8
