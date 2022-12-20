@@ -41,6 +41,8 @@ public class UserServiceImpl implements UserService {
 
         String token = UUID.randomUUID().toString();
         UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
+        userDTO.setUserId(user.getId());
+        userDTO.setToken(token);
 
         Map<String, Object> userMap = BeanUtil.beanToMap(userDTO,
                 new HashMap<>(),
@@ -54,6 +56,6 @@ public class UserServiceImpl implements UserService {
         // 注意这里的过期时间是写死的、当用户有操作时、即登录拦截器满足时、需要更新 token 的有效期、
         stringRedisTemplate.expire(tokenKey, UserCodes.LOGIN_TOKEN_TTL, TimeUnit.MINUTES);
 
-        return ResultMsgDTO.ok(UserCodes.LOGIN_SUCCESS, token);
+        return ResultMsgDTO.ok(UserCodes.LOGIN_SUCCESS, userDTO);
     }
 }

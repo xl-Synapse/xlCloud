@@ -2,8 +2,15 @@ package com.xl.xlcloud.util;
 
 import com.xl.xlcloud.common.FileCodes;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class FileUtils {
     public static int getFileType(Path path) {
@@ -45,5 +52,34 @@ public class FileUtils {
         }
 
         return FileCodes.FILE_TYPE;
+    }
+
+    public static String getFastMD5(String path) {
+        BigInteger bi = null;
+        try {
+            int byteLength = 2048;
+            byte[] buffer = new byte[byteLength];
+            int len = 0;
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            RandomAccessFile file = new RandomAccessFile(path, "r");
+            // 头
+            len = file.read(buffer);
+            md.update(buffer, 0, len);
+
+            // 尾、文件大小足以取出不重叠的头尾时、计算尾的 md5、
+            if (file.length() >= 2 * byteLength) {
+                file.seek(file.length() - byteLength);
+                len = file.read(buffer);
+                md.update(buffer, 0, len);
+            }
+
+            file.close();
+            byte[] b = md.digest();
+            bi = new BigInteger(1, b);
+        } catch (NoSuchAlgorithmException | IOException e) {
+            e.printStackTrace();
+        }
+        return bi == null? "" : bi.toString(16);
     }
 }

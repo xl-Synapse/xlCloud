@@ -12,4 +12,7 @@ public class FileCodes {
     public static final int LIST_FILES_SUCCESS = 10001;
     public static final int LIST_FILES_FAIL = 10002;
 
+    public static final int GET_RECORD_SUCCESS = 10101;
+    public static final int GET_RECORD_FAIL = 10102;
+
 }

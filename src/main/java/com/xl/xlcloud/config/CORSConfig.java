@@ -1,4 +1,4 @@
-package com.xl.xlcloud;
+package com.xl.xlcloud.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

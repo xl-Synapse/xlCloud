@@ -2,6 +2,7 @@ package com.xl.xlcloud.controller;
 
 import com.xl.xlcloud.common.FileCodes;
 import com.xl.xlcloud.dto.FileDTO;
+import com.xl.xlcloud.dto.PlayRecordDTO;
 import com.xl.xlcloud.dto.ResultMsgDTO;
 import com.xl.xlcloud.service.FileService;
 import org.apache.commons.io.FileUtils;
@@ -10,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.HandlerMapping;
 
 
@@ -59,7 +57,18 @@ public class FileController {
     @GetMapping("/video/**")
     public void playVideoWithAuth(HttpServletRequest request, HttpServletResponse response) {
         String rootPath = getParamFromRequest(request);
-        fileServiceImpl.playVideoWithAuth(rootPath, response);
+        fileServiceImpl.playVideoWithAuth(rootPath, request, response);
+    }
+
+    @GetMapping("/playrecord/{userId}&&{filePath}")
+    public ResultMsgDTO getPlayRecord(@PathVariable int userId, @PathVariable String filePath) {
+        filePath = filePath.replace("&", "/");
+        return fileServiceImpl.getPlayRecord(userId, filePath);
+    }
+
+    @PutMapping("/playrecord")
+    public void putPlayRecord(@RequestBody PlayRecordDTO playRecordDTO) {
+        fileServiceImpl.updatePlayRecord(playRecordDTO);
     }
 
     private String getParamFromRequest(HttpServletRequest request) {

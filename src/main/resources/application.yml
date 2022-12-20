@@ -41,3 +41,6 @@ server:
     relaxed-path-chars: ^,[,],
     relaxed-query-chars: ^,[,]
     uri-encoding: UTF-8
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
