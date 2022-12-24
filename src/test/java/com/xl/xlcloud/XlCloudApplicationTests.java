@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.scheduling.annotation.Async;
 
+import java.nio.file.Paths;
+
 @SpringBootTest
 class XlCloudApplicationTests {
 
@@ -33,7 +35,7 @@ class XlCloudApplicationTests {
 
     @Test
     void testMD5() {
-        String md5 = FileUtils.getFastMD5("file/[KTXP+Team.Kaguya][Kaguya_Love_Is_War_2][OVA][GB_CN][HEVC_opus][720p][DVDRIP].mkv");
+        String md5 = FileUtils.getFastMD5(Paths.get("file/testconvert.mkv"));
         System.out.println(md5);
     }
 
@@ -75,5 +77,6 @@ class XlCloudApplicationTests {
 
         System.out.println(playRecord);
     }
+
 
 }

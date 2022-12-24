@@ -35,6 +35,8 @@ spring:
     url: jdbc:mysql://192.168.192.3:3306/xlCloud
     username: root
     password: xllove33
+    hikari:
+      maximum-pool-size: 10
 
 server:
   tomcat:

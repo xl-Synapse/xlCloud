@@ -12,15 +12,10 @@ import java.util.List;
 
 public interface FileService {
 
-    ResultMsgDTO listFiles(String rootPath) throws IOException;
+    ResultMsgDTO listFiles(String rootPath);
 
 //    void downloadFileWithoutAuth(String rootPath, HttpServletRequest request, HttpServletResponse response);
 
     void downloadFileWithAuth(String filePath, HttpServletResponse response);
 
-    void playVideoWithAuth(String filePath, HttpServletRequest request, HttpServletResponse response);
-
-    ResultMsgDTO getPlayRecord(int userId, String filePath);
-
-    void updatePlayRecord(PlayRecordDTO playRecordDTO);
 }

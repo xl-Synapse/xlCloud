@@ -39,37 +39,17 @@ public class FileController {
     public ResultMsgDTO listFiles(HttpServletRequest request) {
         String rootPath = getParamFromRequest(request);
 
-        try {
-            // 这里的 request.getRequestURI() 没有被解码过、而拦截器那里的又是被解码一次的、
-            return fileServiceImpl.listFiles(rootPath);
-        } catch (IOException e) {
-            System.out.println("No such file.");
-            return new ResultMsgDTO(false, FileCodes.LIST_FILES_FAIL, "No such file.", null);
-        }
+        // 这里的 request.getRequestURI() 没有被解码过、而拦截器那里的又是被解码一次的、
+        return fileServiceImpl.listFiles(rootPath);
     }
 
-    @GetMapping("/file/**")
-    public void downloadFileWithAuth(HttpServletRequest request, HttpServletResponse response) {
-        String rootPath = getParamFromRequest(request);
-        fileServiceImpl.downloadFileWithAuth(rootPath, response);
-    }
-
-    @GetMapping("/video/**")
-    public void playVideoWithAuth(HttpServletRequest request, HttpServletResponse response) {
-        String rootPath = getParamFromRequest(request);
-        fileServiceImpl.playVideoWithAuth(rootPath, request, response);
-    }
-
-    @GetMapping("/playrecord/{userId}&&{filePath}")
-    public ResultMsgDTO getPlayRecord(@PathVariable int userId, @PathVariable String filePath) {
+    @GetMapping("/file/{filePath}")
+    public void downloadFileWithAuth(@PathVariable String filePath, HttpServletRequest request, HttpServletResponse response) {
+//        String rootPath = getParamFromRequest(request);
         filePath = filePath.replace("&", "/");
-        return fileServiceImpl.getPlayRecord(userId, filePath);
+        fileServiceImpl.downloadFileWithAuth(filePath, response);
     }
 
-    @PutMapping("/playrecord")
-    public void putPlayRecord(@RequestBody PlayRecordDTO playRecordDTO) {
-        fileServiceImpl.updatePlayRecord(playRecordDTO);
-    }
 
     private String getParamFromRequest(HttpServletRequest request) {
         String path1 = request.getAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE).toString();

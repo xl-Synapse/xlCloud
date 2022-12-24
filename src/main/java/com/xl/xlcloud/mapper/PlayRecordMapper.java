@@ -3,6 +3,8 @@ package com.xl.xlcloud.mapper;
 import com.xl.xlcloud.entity.PlayRecord;
 import org.apache.ibatis.annotations.*;
 
+import java.util.List;
+
 @Mapper
 public interface PlayRecordMapper {
 
@@ -18,4 +20,11 @@ public interface PlayRecordMapper {
     @Delete("delete from tb_play_record where file_md5=#{fileMd5}")
     int deletePlayRecord(PlayRecord playRecord);
 
+    @Select("<script>"
+            + "SELECT file_md5 FROM tb_play_record WHERE user_id=#{userId} and file_md5 IN "
+            + "<foreach item='item' index='index' collection='fileMd5s' open='(' separator=',' close=')'>"
+            + "#{item}"
+            + "</foreach>"
+            + "</script>")
+    List<String> getMd5sIn(int userId, List<String> fileMd5s);
 }

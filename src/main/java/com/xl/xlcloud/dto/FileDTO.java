@@ -1,8 +1,10 @@
 package com.xl.xlcloud.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class FileDTO {
     private String path;
 
@@ -10,11 +12,8 @@ public class FileDTO {
 
     private int type; // 0 文件夹 1 文件、
 
+    private String fileMd5;
+
     public FileDTO () {}
 
-    public FileDTO(String path, String fileName, int type) {
-        this.path = path;
-        this.fileName = fileName;
-        this.type = type;
-    }
 }

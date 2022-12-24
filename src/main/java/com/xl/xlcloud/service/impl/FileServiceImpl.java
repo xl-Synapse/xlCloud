@@ -49,7 +49,7 @@ public class FileServiceImpl implements FileService {
     PlayRecordMapper playRecordMapper;
 
     @Override
-    public ResultMsgDTO listFiles(String rootPath) throws IOException{
+    public ResultMsgDTO listFiles(String rootPath){
         // 先检查有没有该目录、
         Path rootP = Paths.get(rootPath);
         if (!Files.exists(rootP)) {
@@ -60,11 +60,18 @@ public class FileServiceImpl implements FileService {
         // 异步执行、
         fileServiceAsync.writeDirectLink2Redis(rootPath);
 
-        List<FileDTO> files = Files.list(rootP)
-                .map(
-                        path -> new FileDTO(path.toString().replace("\\", "/"), path.getFileName().toString(), FileUtils.getFileType(path))
-                )
-                .collect(Collectors.toList());
+        List<FileDTO> files = null;
+        try {
+            files = Files.list(rootP)
+                    .map(
+                            path -> new FileDTO(path.toString().replace("\\", "/"), path.getFileName().toString(), FileUtils.getFileType(path), FileUtils.getFastMD5(path))
+                    )
+                    .collect(Collectors.toList());
+
+        } catch (IOException e) {
+            return new ResultMsgDTO(false, FileCodes.LIST_FILES_FAIL, "No such file.", null);
+        }
+
         return new ResultMsgDTO(true, FileCodes.LIST_FILES_SUCCESS, "List files success.", files);
     }
     
@@ -108,69 +115,6 @@ public class FileServiceImpl implements FileService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    @Override
-    public void playVideoWithAuth(String filePath, HttpServletRequest request, HttpServletResponse response) {
-        Path path = Paths.get(filePath);
-        if (Files.isDirectory(path)){
-            return;
-        }
-        
-
-        try {
-            File file = path.toFile();
-            if (file.exists()) {
-                request.setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, path.toString());
-                nonStaticResourceHttpRequestHandler.handleRequest(request, response);
-            }
-        } catch (java.nio.file.NoSuchFileException e) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-        } catch (Exception e) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
-    }
-
-    @Override
-    public ResultMsgDTO getPlayRecord(int userId, String filePath) {
-        // 计算 快速md5 并到数据库查询播放记录、
-        String fileMd5 = FileUtils.getFastMD5(filePath);
-        if (fileMd5.equals("")) {
-            return new ResultMsgDTO(true, FileCodes.GET_RECORD_SUCCESS, "No record.", new PlayRecordDTO(userId, fileMd5, 0));
-        }
-
-        PlayRecord playRecord = playRecordMapper.getPlayRecordByMd5(userId, fileMd5);
-        if (playRecord == null) {
-            // 没记录、
-            return new ResultMsgDTO(true, FileCodes.GET_RECORD_SUCCESS, "No record.", new PlayRecordDTO(userId, fileMd5, 0));
-        }
-
-        PlayRecordDTO playRecordDTO = new PlayRecordDTO();
-        BeanUtils.copyProperties(playRecord, playRecordDTO);
-        return new ResultMsgDTO(true, FileCodes.GET_RECORD_SUCCESS, "Get record.", playRecord);
-    }
-
-    @Async
-    @Override
-    public void updatePlayRecord(PlayRecordDTO playRecordDTO) {
-
-        // 数据检查、
-        if (
-                playRecordDTO == null ||
-                StringUtils.isBlank(playRecordDTO.getFileMd5()) ||
-                playRecordDTO.getUserId() <= 0 ||
-                playRecordDTO.getPosition() <= 0
-        ) {
-          return;
-        }
-
-        PlayRecord playRecord = new PlayRecord();
-        BeanUtils.copyProperties(playRecordDTO, playRecord);
-        // 尝试更新、失败则新建、
-        int successNum = playRecordMapper.updatePlayRecord(playRecord);
-        if (successNum <= 0) {
-            playRecordMapper.createPlayRecord(playRecord);
         }
     }
 

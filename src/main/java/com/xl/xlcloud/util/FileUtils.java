@@ -54,7 +54,11 @@ public class FileUtils {
         return FileCodes.FILE_TYPE;
     }
 
-    public static String getFastMD5(String path) {
+    public static String getFastMD5(Path path) {
+        if (!path.toFile().exists() || path.toFile().isDirectory()) {
+            return "";
+        }
+
         BigInteger bi = null;
         try {
             int byteLength = 2048;
@@ -62,9 +66,13 @@ public class FileUtils {
             int len = 0;
             MessageDigest md = MessageDigest.getInstance("MD5");
 
-            RandomAccessFile file = new RandomAccessFile(path, "r");
+            RandomAccessFile file = new RandomAccessFile(path.toString(), "r");
             // 头
             len = file.read(buffer);
+            if (len <= 0) {
+                // 异常文件、
+                return "";
+            }
             md.update(buffer, 0, len);
 
             // 尾、文件大小足以取出不重叠的头尾时、计算尾的 md5、
@@ -79,7 +87,9 @@ public class FileUtils {
             bi = new BigInteger(1, b);
         } catch (NoSuchAlgorithmException | IOException e) {
             e.printStackTrace();
+            return "";
         }
+
         return bi == null? "" : bi.toString(16);
     }
 }
