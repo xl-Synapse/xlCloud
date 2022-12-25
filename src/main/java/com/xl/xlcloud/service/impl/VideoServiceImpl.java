@@ -52,6 +52,7 @@ public class VideoServiceImpl implements VideoService {
     @Value("${root-path}")
     String rootPath;
 
+    // 已经弃用、
     @Override
     public void playVideoWithAuth(String filePath, HttpServletRequest request, HttpServletResponse response) {
         filePath = rootPath + filePath;
@@ -61,15 +62,11 @@ public class VideoServiceImpl implements VideoService {
             return;
         }
 
-
         try {
             File file = path.toFile();
             if (file.exists()) {
-
-
                 request.setAttribute(NonStaticResourceHttpRequestHandler.ATTR_FILE, path.toString());
                 nonStaticResourceHttpRequestHandler.handleRequest(request, response);
-
             }
         } catch (java.nio.file.NoSuchFileException e) {
             response.setStatus(HttpStatus.NOT_FOUND.value());
@@ -101,18 +98,18 @@ public class VideoServiceImpl implements VideoService {
 
         Path path = Paths.get(filePath);
         if (Files.isDirectory(path)){
-            return new ResultMsgDTO(false, 201, "no such file", null);
+            return new ResultMsgDTO(false, VideoCodes.GET_CONVERTINFO_NO_SUCH_FILE, "no such file", null);
         }
 
 
         File file = path.toFile();
         if (!file.exists()) {
-            return new ResultMsgDTO(false, 201, "no such file", null);
+            return new ResultMsgDTO(false, VideoCodes.GET_CONVERTINFO_NO_SUCH_FILE, "no such file", null);
         }
 
         if (!file.getName().toLowerCase().endsWith(".mkv")) {
             // 非 mkv 不转码、
-            return new ResultMsgDTO(false, 202, "no mkv file", null);
+            return new ResultMsgDTO(false, VideoCodes.GET_CONVERTINFO_SHOULD_NOT_CONVERT_FILE, "no mkv file", null);
         }
 
         // 查询是否存在转换记录、
@@ -123,13 +120,13 @@ public class VideoServiceImpl implements VideoService {
             // 没有转码过、启动转码、
             // 暂时关闭转码功能、等待适配 svp 转码、
 //            videoServiceAsync.convert2Mp4(path, fileMd5);
-            return new ResultMsgDTO(false, 203, "wait for convert", null);
+            return new ResultMsgDTO(false, VideoCodes.GET_CONVERTINFO_WAIT_FOR_CONVERT, "wait for convert", null);
         }
 
         // 存在转码记录、但仍需要判断是否已经转换完毕了、
         if (convertInfo.getTime() == null) {
 
-            return new ResultMsgDTO(false, 204, "wait for convert", null);
+            return new ResultMsgDTO(false, VideoCodes.GET_CONVERTINFO_WAIT_FOR_CONVERT, "wait for convert", null);
         }
 
 
@@ -144,7 +141,7 @@ public class VideoServiceImpl implements VideoService {
 
 
         // 正常逻辑、返回转码后的文件md5用于前端播放、
-        return new ResultMsgDTO(true, 204, "success", convertInfo.getFileMd5());
+        return new ResultMsgDTO(true, VideoCodes.GET_CONVERTINFO_SUCCESS, "success", convertInfo.getFileMd5());
 
     }
 

@@ -35,19 +35,23 @@ public class FileController {
     @Autowired
     FileService fileServiceImpl;
 
-    @GetMapping(value = "/files/**")
-    public ResultMsgDTO listFiles(HttpServletRequest request) {
-        String rootPath = getParamFromRequest(request);
+    // 适配根目录、
+    @GetMapping(value = "/files/")
+    public ResultMsgDTO listFilesForRoot(HttpServletRequest request) {
+        return fileServiceImpl.listFiles("");
+    }
 
-        // 这里的 request.getRequestURI() 没有被解码过、而拦截器那里的又是被解码一次的、
-        return fileServiceImpl.listFiles(rootPath);
+    @GetMapping(value = "/files/{filePath}")
+    public ResultMsgDTO listFiles(@PathVariable String filePath, HttpServletRequest request) {
+        filePath = filePath.replace("&", "/");
+        return fileServiceImpl.listFiles(filePath);
     }
 
     @GetMapping("/file/{filePath}")
     public void downloadFileWithAuth(@PathVariable String filePath, HttpServletRequest request, HttpServletResponse response) {
 //        String rootPath = getParamFromRequest(request);
         filePath = filePath.replace("&", "/");
-        fileServiceImpl.downloadFileWithAuth(filePath, response);
+        fileServiceImpl.downloadFile(filePath, response);
     }
 
 

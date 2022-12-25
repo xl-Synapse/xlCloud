@@ -12,10 +12,8 @@ import java.util.List;
 
 public interface FileService {
 
-    ResultMsgDTO listFiles(String rootPath);
+    ResultMsgDTO listFiles(String filePath);
 
-//    void downloadFileWithoutAuth(String rootPath, HttpServletRequest request, HttpServletResponse response);
-
-    void downloadFileWithAuth(String filePath, HttpServletResponse response);
+    void downloadFile(String filePath, HttpServletResponse response);
 
 }

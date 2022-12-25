@@ -83,7 +83,7 @@ public class FileServiceImpl implements FileService {
     
 
     @Override
-    public void downloadFileWithAuth(String filePath, HttpServletResponse response) {
+    public void downloadFile(String filePath, HttpServletResponse response) {
         filePath = rootPath + filePath;
 
         Path path = Paths.get(filePath);
@@ -125,28 +125,5 @@ public class FileServiceImpl implements FileService {
             }
         }
     }
-
-/*    @Override
-    public void playVideoWithAuth(String filePath, HttpServletRequest request, HttpServletResponse response) {
-        Path path = Paths.get(filePath);
-        if (Files.isDirectory(path)){
-            return;
-        }
-
-        try {
-            File file = path.toFile();
-            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-            response.setHeader("Content-Disposition", "attachment; filename="+file.getName().replace(" ", "_"));
-            response.setHeader("Accept-Ranges", "bytes");
-            response.setHeader("Content-Length", "" + file.length());
-            InputStream iStream = new FileInputStream(file);
-            IOUtils.copy(iStream, response.getOutputStream());
-            response.flushBuffer();
-        } catch (java.nio.file.NoSuchFileException e) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
-        } catch (Exception e) {
-            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        }
-    }*/
 
 }
