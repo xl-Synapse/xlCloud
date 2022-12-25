@@ -12,9 +12,13 @@ import com.xl.xlcloud.mapper.PlayRecordMapper;
 import com.xl.xlcloud.service.VideoService;
 import com.xl.xlcloud.service.impl.async.VideoServiceAsync;
 import com.xl.xlcloud.util.FileUtils;
+import com.xl.xlcloud.util.VideoUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class VideoServiceImpl implements VideoService {
     @Autowired
     PlayRecordMapper playRecordMapper;
@@ -44,8 +49,13 @@ public class VideoServiceImpl implements VideoService {
     @Autowired
     NonStaticResourceHttpRequestHandler nonStaticResourceHttpRequestHandler;
 
+    @Value("${root-path}")
+    String rootPath;
+
     @Override
     public void playVideoWithAuth(String filePath, HttpServletRequest request, HttpServletResponse response) {
+        filePath = rootPath + filePath;
+
         Path path = Paths.get(filePath);
         if (Files.isDirectory(path)){
             return;
@@ -69,6 +79,17 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @Override
+    public void playVideo(String filePath, HttpServletRequest request, HttpServletResponse response, HttpHeaders headers) {
+        filePath = rootPath + filePath;
+
+        try {
+            VideoUtils.download(filePath, request, response, headers);
+        } catch (Exception e) {
+            log.error("getMedia error, fileName={}", filePath, e);
+        }
+    }
+
+    @Override
     public ResultMsgDTO getPlayedVideo(int userId, List<String> fileMd5s) {
         List<String> resultFileMd5s =  playRecordMapper.getMd5sIn(userId, fileMd5s);
         return new ResultMsgDTO(true, VideoCodes.PLAYED_SUCCESS, "success", resultFileMd5s);
@@ -76,6 +97,8 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public ResultMsgDTO getConvertInfo(String filePath) {
+        filePath = rootPath + filePath;
+
         Path path = Paths.get(filePath);
         if (Files.isDirectory(path)){
             return new ResultMsgDTO(false, 201, "no such file", null);
@@ -98,7 +121,8 @@ public class VideoServiceImpl implements VideoService {
 
         if (convertInfo == null) {
             // 没有转码过、启动转码、
-            videoServiceAsync.convert2Mp4(path, fileMd5);
+            // 暂时关闭转码功能、等待适配 svp 转码、
+//            videoServiceAsync.convert2Mp4(path, fileMd5);
             return new ResultMsgDTO(false, 203, "wait for convert", null);
         }
 
@@ -127,6 +151,8 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public ResultMsgDTO getPlayRecord(int userId, String filePath) {
+        filePath = rootPath + filePath;
+
         // 计算 快速md5 并到数据库查询播放记录、
         String fileMd5 = FileUtils.getFastMD5(Paths.get(filePath));
         if (fileMd5.equals("")) {

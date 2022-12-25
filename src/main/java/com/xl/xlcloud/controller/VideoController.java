@@ -4,6 +4,7 @@ import com.xl.xlcloud.dto.PlayRecordDTO;
 import com.xl.xlcloud.dto.ResultMsgDTO;
 import com.xl.xlcloud.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.*;
@@ -23,11 +24,14 @@ public class VideoController {
     VideoService videoServiceImpl;
 
     @GetMapping("/video/{filePath}")
-    public void playVideoWithAuth(@PathVariable String filePath, HttpServletRequest request, HttpServletResponse response) {
-//        String rootPath = getParamFromRequest(request);
+    public void playVideo(
+            @PathVariable String filePath, HttpServletRequest request, HttpServletResponse response
+            , @RequestHeader HttpHeaders headers
+    ) {
         filePath = filePath.replace("&", "/");
         System.out.println("video" + filePath);
-        videoServiceImpl.playVideoWithAuth(filePath, request, response);
+//        videoServiceImpl.playVideoWithAuth(filePath, request, response); // 旧播放模式、较为卡顿、
+        videoServiceImpl.playVideo(filePath, request, response, headers);
     }
 
     @GetMapping("/filerecord/{userId}")

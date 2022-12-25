@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -48,23 +49,28 @@ public class FileServiceImpl implements FileService {
     @Autowired
     PlayRecordMapper playRecordMapper;
 
+    @Value("${root-path}")
+    String rootPath;
+
     @Override
-    public ResultMsgDTO listFiles(String rootPath){
+    public ResultMsgDTO listFiles(String filePath){
+        filePath = rootPath + filePath;
+
         // 先检查有没有该目录、
-        Path rootP = Paths.get(rootPath);
+        Path rootP = Paths.get(filePath);
         if (!Files.exists(rootP)) {
             return new ResultMsgDTO(false, FileCodes.LIST_FILES_FAIL, "No such file", null);
         }
         // 生成当前目录直链、这个应该交给线程池去做、
         // 为了兼容字幕播放、也需要生成当前目录 sub 子目录的直链、
         // 异步执行、
-        fileServiceAsync.writeDirectLink2Redis(rootPath);
+        fileServiceAsync.writeDirectLink2Redis(filePath);
 
         List<FileDTO> files = null;
         try {
             files = Files.list(rootP)
                     .map(
-                            path -> new FileDTO(path.toString().replace("\\", "/"), path.getFileName().toString(), FileUtils.getFileType(path), FileUtils.getFastMD5(path))
+                            path -> new FileDTO(path.toString().substring(rootPath.length()).replace("\\", "/"), path.getFileName().toString(), FileUtils.getFileType(path), FileUtils.getFastMD5(path))
                     )
                     .collect(Collectors.toList());
 
@@ -78,6 +84,8 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void downloadFileWithAuth(String filePath, HttpServletResponse response) {
+        filePath = rootPath + filePath;
+
         Path path = Paths.get(filePath);
         if (Files.isDirectory(path)){
             return;

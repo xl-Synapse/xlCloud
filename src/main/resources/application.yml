@@ -1,3 +1,4 @@
+root-path: E:\play\间谍过家家2\
 spring:
   redis:
     host: 192.168.192.3
@@ -43,6 +44,7 @@ server:
     relaxed-path-chars: ^,[,],
     relaxed-query-chars: ^,[,]
     uri-encoding: UTF-8
+  port: 8080
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
