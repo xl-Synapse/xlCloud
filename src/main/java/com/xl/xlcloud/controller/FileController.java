@@ -1,5 +1,6 @@
 package com.xl.xlcloud.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.xl.xlcloud.common.FileCodes;
 import com.xl.xlcloud.dto.FileDTO;
 import com.xl.xlcloud.dto.PlayRecordDTO;
@@ -37,12 +38,12 @@ public class FileController {
 
     // 适配根目录、
     @GetMapping(value = "/files/")
-    public ResultMsgDTO listFilesForRoot(HttpServletRequest request) {
+    public ResultMsgDTO listFilesForRoot(HttpServletRequest request) throws UnsupportedEncodingException, JsonProcessingException {
         return fileServiceImpl.listFiles("");
     }
 
     @GetMapping(value = "/files/{filePath}")
-    public ResultMsgDTO listFiles(@PathVariable String filePath, HttpServletRequest request) {
+    public ResultMsgDTO listFiles(@PathVariable String filePath, HttpServletRequest request) throws UnsupportedEncodingException, JsonProcessingException {
         filePath = filePath.replace("&", "/");
         return fileServiceImpl.listFiles(filePath);
     }

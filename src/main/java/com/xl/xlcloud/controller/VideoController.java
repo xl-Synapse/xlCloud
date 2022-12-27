@@ -45,7 +45,7 @@ public class VideoController {
         return videoServiceImpl.getConvertInfo(filePath);
     }
 
-    @GetMapping("/playrecord/{userId}&&{filePath}")
+    @GetMapping("/playrecord/{userId}&&{filePath}") // 后期应该修改为直接使用 md5 查询、
     public ResultMsgDTO getPlayRecord(@PathVariable int userId, @PathVariable String filePath) {
         filePath = filePath.replace("&", "/");
         return videoServiceImpl.getPlayRecord(userId, filePath);
