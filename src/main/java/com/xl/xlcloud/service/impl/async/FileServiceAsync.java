@@ -49,12 +49,23 @@ public class FileServiceAsync {
 
     @Async
     public void updateListFilesCache(String cacheKey, Path nowPath) throws JsonProcessingException {
-        synUpdateListFilesCache(cacheKey, nowPath);
+        List<FileDTO> files = synUpdateListFilesCache(cacheKey, nowPath);
+        ObjectMapper objectMapper = new ObjectMapper();
+        ListFilesCacheDTO cacheDTO = new ListFilesCacheDTO(nowPath.toFile().lastModified(), files);
+        String cacheValue = objectMapper.writeValueAsString(cacheDTO);
+
+        // 同类调用异步失效、但是该方法本来就是异步的、
+        setToRedis(cacheKey, cacheValue, FileCodes.LIST_FILES_CACHE_TTL, TimeUnit.DAYS);
     }
 
     @Async
-    public void updateExpires(String key, Long time, TimeUnit unit) {
+    public void updateExpires(String key, long time, TimeUnit unit) {
         stringRedisTemplate.expire(key, time, unit);
+    }
+
+    @Async
+    public void setToRedis(String key, String value, long time, TimeUnit unit) {
+        stringRedisTemplate.opsForValue().set(key, value, time, unit);
     }
 
     public List<FileDTO> synUpdateListFilesCache(String cacheKey, Path nowPath) throws JsonProcessingException {
@@ -72,10 +83,10 @@ public class FileServiceAsync {
             return new ArrayList<>();
         }
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        ListFilesCacheDTO cacheDTO = new ListFilesCacheDTO(nowPath.toFile().lastModified(), files);
-        String cacheValue = objectMapper.writeValueAsString(cacheDTO);
-        stringRedisTemplate.opsForValue().set(cacheKey, cacheValue, FileCodes.LIST_FILES_CACHE_TTL, TimeUnit.DAYS);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        ListFilesCacheDTO cacheDTO = new ListFilesCacheDTO(nowPath.toFile().lastModified(), files);
+//        String cacheValue = objectMapper.writeValueAsString(cacheDTO);
+//        stringRedisTemplate.opsForValue().set(cacheKey, cacheValue, FileCodes.LIST_FILES_CACHE_TTL, TimeUnit.DAYS);
         return files;
     }
 }

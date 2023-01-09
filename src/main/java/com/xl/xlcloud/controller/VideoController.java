@@ -16,6 +16,7 @@ import javax.websocket.server.PathParam;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import cn.hutool.core.codec.Base64;
 import java.util.List;
 
 @RestController
@@ -23,13 +24,13 @@ public class VideoController {
     @Autowired
     VideoService videoServiceImpl;
 
+
     @GetMapping("/video/{filePath}")
     public void playVideo(
             @PathVariable String filePath, HttpServletRequest request, HttpServletResponse response
             , @RequestHeader HttpHeaders headers
     ) {
-        filePath = filePath.replace("&", "/");
-        System.out.println("video" + filePath);
+        filePath = new String(Base64.decode(filePath), StandardCharsets.UTF_8);
 //        videoServiceImpl.playVideoWithAuth(filePath, request, response); // 旧播放模式、较为卡顿、
         videoServiceImpl.playVideo(filePath, request, response, headers);
     }
@@ -41,13 +42,13 @@ public class VideoController {
 
     @GetMapping("/convertinfo/{filePath}")
     public ResultMsgDTO getConvertInfo(@PathVariable String filePath) {
-        filePath = filePath.replace("&", "/");
+        filePath = new String(Base64.decode(filePath), StandardCharsets.UTF_8);
         return videoServiceImpl.getConvertInfo(filePath);
     }
 
     @GetMapping("/playrecord/{userId}&&{filePath}") // 后期应该修改为直接使用 md5 查询、
     public ResultMsgDTO getPlayRecord(@PathVariable int userId, @PathVariable String filePath) {
-        filePath = filePath.replace("&", "/");
+        filePath = new String(Base64.decode(filePath), StandardCharsets.UTF_8);
         return videoServiceImpl.getPlayRecord(userId, filePath);
     }
 

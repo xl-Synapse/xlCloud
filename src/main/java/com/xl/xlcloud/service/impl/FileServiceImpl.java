@@ -62,6 +62,7 @@ public class FileServiceImpl implements FileService {
     public ResultMsgDTO listFiles(String filePath) throws UnsupportedEncodingException, JsonProcessingException {
         filePath = rootPath + filePath;
 
+        System.out.println("list: " + filePath);
 
         // 先检查有没有该目录、
         Path rootP = Paths.get(filePath.equals("") ? "./" : filePath);
@@ -85,20 +86,29 @@ public class FileServiceImpl implements FileService {
         // 是否需要更新缓存、
         if (!StringUtils.isBlank(cacheValue)) {
             ListFilesCacheDTO cacheDTO = objectMapper.readValue(cacheValue, ListFilesCacheDTO.class);
-            if (cacheDTO.getLastModify() != lastModified) {
+            if (cacheDTO.getLastModify() == lastModified) {
+/*
                 // 需要缓存更新、异步、
                 fileServiceAsync.updateListFilesCache(cacheKey, rootP);
                 // 先用着旧缓存、
                 return new ResultMsgDTO(true, FileCodes.LIST_FILES_SUCCESS, "List files success.", cacheDTO.getData());
+*/
+                // 不需要缓存更新、刷新有效期、
+                fileServiceAsync.updateExpires(cacheKey, FileCodes.LIST_FILES_CACHE_TTL, TimeUnit.DAYS);
+                return new ResultMsgDTO(true, FileCodes.LIST_FILES_SUCCESS, "List files success.", cacheDTO.getData());
+
             }
-            // 不需要缓存更新、刷新有效期、
-            fileServiceAsync.updateExpires(cacheKey, FileCodes.LIST_FILES_CACHE_TTL, TimeUnit.DAYS);
-            return new ResultMsgDTO(true, FileCodes.LIST_FILES_SUCCESS, "List files success.", cacheDTO.getData());
+            // 需要缓存更新、为了提升体验、还是选择同步、
         }
 
-        // 需要构建缓存、同步、
+        // 需要构建缓存、先同步生成数据、
 
         List<FileDTO> files = fileServiceAsync.synUpdateListFilesCache(cacheKey, rootP);
+        ListFilesCacheDTO cacheDTO = new ListFilesCacheDTO(lastModified, files);
+        cacheValue = objectMapper.writeValueAsString(cacheDTO);
+
+        // 异步构建缓存、
+        fileServiceAsync.setToRedis(cacheKey, cacheValue, FileCodes.LIST_FILES_CACHE_TTL, TimeUnit.DAYS);
 
         return new ResultMsgDTO(true, FileCodes.LIST_FILES_SUCCESS, "List files success.", files);
     }

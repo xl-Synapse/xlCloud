@@ -13,8 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StopWatch;
 import org.springframework.util.unit.DataSize;
-import ws.schild.jave.process.ProcessWrapper;
-import ws.schild.jave.process.ffmpeg.DefaultFFMPEGLocator;
+//import ws.schild.jave.process.ProcessWrapper;
+//import ws.schild.jave.process.ffmpeg.DefaultFFMPEGLocator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,8 +27,11 @@ import java.util.List;
 
 @Slf4j
 public class VideoUtils {
-
     public static boolean convert2Mp4(Path path, Path targetPath) {
+        return false;
+    }
+
+/*    public static boolean convert2Mp4(Path path, Path targetPath) {
         ProcessWrapper ffmpeg = new DefaultFFMPEGLocator().createExecutor();
 //        ffmpeg.addArgument("-hwaccel");
 //        ffmpeg.addArgument("cuda");
@@ -74,7 +77,7 @@ public class VideoUtils {
 
         // 转换成功、
         return true;
-    }
+    }*/
 
 
 
