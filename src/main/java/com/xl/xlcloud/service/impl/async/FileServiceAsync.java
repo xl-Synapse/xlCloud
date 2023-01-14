@@ -33,15 +33,19 @@ public class FileServiceAsync {
 
     @Async
     public void writeDirectLink2Redis(String nowPath) {
+        if (!nowPath.endsWith("/")) {
+            nowPath += "/";
+        }
+
         stringRedisTemplate.opsForValue().set(
-                FileCodes.FILE_DIRECT_LINK_PREFIX + "/" + (nowPath.equals("") ? "" : nowPath + "/"), "1",
+                FileCodes.FILE_DIRECT_LINK_PREFIX + nowPath, "1",
                 FileCodes.FILE_DIRECT_LINK_TTL, TimeUnit.MINUTES
         );
 
         // 检查子目录是否存在、
         if (Files.exists(Paths.get(nowPath + "/sub"))) {
             stringRedisTemplate.opsForValue().set(
-                    FileCodes.FILE_DIRECT_LINK_PREFIX + "/" + (nowPath.equals("") ? "sub/" : nowPath + "/sub/"), "1",
+                    FileCodes.FILE_DIRECT_LINK_PREFIX + nowPath + "/sub/", "1",
                     FileCodes.FILE_DIRECT_LINK_TTL, TimeUnit.MINUTES
             );
         }

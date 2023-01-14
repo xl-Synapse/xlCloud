@@ -1,5 +1,5 @@
 #root-path: E:\play\间谍过家家2\
-root-path:
+root-path: file/
 spring:
   redis:
     host: 192.168.192.3

@@ -189,4 +189,20 @@ public class VideoServiceImpl implements VideoService {
             playRecordMapper.createPlayRecord(playRecord);
         }
     }
+
+    @Async
+    @Override
+    public void updatePlayRecordByPath(int userId, String filePath, int position) {
+        if (userId <= 0 || StringUtils.isBlank(filePath) || position <= 0) {
+            return;
+        }
+
+        String fileMd5 = FileUtils.getFastMD5(Paths.get(filePath));
+        if (StringUtils.isBlank(fileMd5)) {
+            return;
+        }
+
+        PlayRecordDTO playRecordDTO = new PlayRecordDTO(userId, fileMd5, position);
+        updatePlayRecord(playRecordDTO);
+    }
 }

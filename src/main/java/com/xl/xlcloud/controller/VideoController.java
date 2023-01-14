@@ -56,4 +56,25 @@ public class VideoController {
     public void putPlayRecord(@RequestBody PlayRecordDTO playRecordDTO) {
         videoServiceImpl.updatePlayRecord(playRecordDTO);
     }
+
+    /**
+     * 兼容pc端 potplayer + autohotkey 播放记录、
+     * */
+
+    @GetMapping("/playrecordpp/{userId}&&{filePath}&&{position}")
+    public void putPlayRecordPotPlayer(@PathVariable int userId, @PathVariable String filePath, @PathVariable String position) {
+        filePath = new String(Base64.decode(filePath), StandardCharsets.UTF_8);
+
+        // 时间要根据格式做转换、
+        String[] positionArray = position.split(":");
+        int positionInt = 0;
+        for (int i = positionArray.length - 1; i >= 0; i--) {
+            positionInt =
+                    (int) Math.pow(60, positionArray.length - i - 1) * Integer.parseInt(positionArray[i])
+                            + positionInt;
+        }
+        videoServiceImpl.updatePlayRecordByPath(userId, filePath, positionInt);
+    }
+
+
 }

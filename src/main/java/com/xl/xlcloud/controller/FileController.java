@@ -6,6 +6,7 @@ import com.xl.xlcloud.dto.FileDTO;
 import com.xl.xlcloud.dto.PlayRecordDTO;
 import com.xl.xlcloud.dto.ResultMsgDTO;
 import com.xl.xlcloud.service.FileService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import cn.hutool.core.codec.Base64;
 
 
+@Slf4j
 @RestController
 public class FileController {
 
@@ -34,7 +36,7 @@ public class FileController {
     // 适配根目录、
     @GetMapping(value = "/files/")
     public ResultMsgDTO listFilesForRoot() throws UnsupportedEncodingException, JsonProcessingException {
-        return fileServiceImpl.listFiles("");
+        return fileServiceImpl.listFiles("./");
     }
 
     @GetMapping(value = "/files/{filePath}")
@@ -46,6 +48,7 @@ public class FileController {
     @GetMapping("/file/{filePath}")
     public void downloadFileWithAuth(@PathVariable String filePath, HttpServletResponse response) {
         filePath = new String(Base64.decode(filePath), StandardCharsets.UTF_8);
+        log.info("download:" + filePath);
         fileServiceImpl.downloadFile(filePath, response);
     }
 }

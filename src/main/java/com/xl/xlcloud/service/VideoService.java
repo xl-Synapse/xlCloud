@@ -20,4 +20,6 @@ public interface VideoService {
     ResultMsgDTO getPlayRecord(int userId, String filePath);
 
     void updatePlayRecord(PlayRecordDTO playRecordDTO);
+
+    void updatePlayRecordByPath(int userId, String filePath, int position);
 }

@@ -1,10 +1,12 @@
 package com.xl.xlcloud.util;
 
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xl.xlcloud.common.FileCodes;
 import com.xl.xlcloud.common.UserCodes;
 import com.xl.xlcloud.dto.ResultMsgDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -22,10 +24,14 @@ import java.util.regex.Pattern;
 
 public class LoginInterceptor implements HandlerInterceptor {
     private StringRedisTemplate stringRedisTemplate;
-    private Pattern pattern = Pattern.compile("\\/(file|video)(.*\\/)", Pattern.DOTALL);
+    private Pattern pattern = Pattern.compile("\\/(file|video)\\/(.*)", Pattern.DOTALL);
+    private Pattern dirPattern = Pattern.compile("(.*\\/).*", Pattern.DOTALL);
 
-    public LoginInterceptor(StringRedisTemplate stringRedisTemplate) {
+    private String rootPath;
+
+    public LoginInterceptor(StringRedisTemplate stringRedisTemplate, String rootPath) {
         this.stringRedisTemplate = stringRedisTemplate;
+        this.rootPath = rootPath;
     }
 
     @Override
@@ -41,15 +47,26 @@ public class LoginInterceptor implements HandlerInterceptor {
             // 空 token 也有可能是 img 在访问直链、
             // 检查直链、
 
-            // 这里这需要解码一次、
+/*            // 这里这需要解码一次、
             String rootPath = URLDecoder.decode(
                     request.getRequestURI().replace("+", "%2B"),
                     String.valueOf(StandardCharsets.UTF_8)
-            );
-//            String rootPath = request.getRequestURI();
-            Matcher matcher = pattern.matcher(rootPath);
+            );*/
+
+
+
+            String uri = request.getRequestURI();
+            Matcher matcher = pattern.matcher(uri);
             if (matcher.find() && matcher.groupCount() >= 2){
-                String key = FileCodes.FILE_DIRECT_LINK_PREFIX + matcher.group(2);
+                String filePath = new String(Base64.decode(matcher.group(2)), StandardCharsets.UTF_8);
+                filePath = rootPath + filePath;
+                matcher = dirPattern.matcher(filePath);
+
+                if (!matcher.find()) {
+                    return false;
+                }
+
+                String key = FileCodes.FILE_DIRECT_LINK_PREFIX + matcher.group(1);
                 Object result = stringRedisTemplate.opsForValue()
                         .get(key);
 

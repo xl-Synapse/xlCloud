@@ -65,7 +65,7 @@ public class FileServiceImpl implements FileService {
         System.out.println("list: " + filePath);
 
         // 先检查有没有该目录、
-        Path rootP = Paths.get(filePath.equals("") ? "./" : filePath);
+        Path rootP = Paths.get(filePath);
         if (!Files.exists(rootP)) {
             return new ResultMsgDTO(false, FileCodes.LIST_FILES_FAIL, "No such file", null);
         }
